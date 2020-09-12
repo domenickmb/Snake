@@ -1,3 +1,12 @@
+#!/usr/bin/env python3
+#
+# Created by: Domenick M. Botardo
+#
+# Program name: snake.py
+#
+# Description:
+#    A classic snake game implemented in Python using the pygame module
+#
 import pygame
 import sys
 import random
@@ -5,13 +14,15 @@ import random
 class Snake:
     def __init__(self):
         self.length = 1
-        self.positions = [((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))]
+        self.segments = [((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))]
         self.direction = random.choice([UP, DOWN, LEFT, RIGHT])
         self.color = (7, 29, 23)
         self.score = 0
+        self.game_active = False
+        self.game_over = False
 
     def get_head_position(self):
-        return self.positions[0]
+        return self.segments[0]
 
     def turn(self, point):
         opposite_direction = (point[0] * -1, point[1] * -1)
@@ -32,22 +43,25 @@ class Snake:
         # the snake entering the border as it is exiting the opposite side of the border
         new_pos = (new_pos[0] % SCREEN_WIDTH, new_pos[1] % SCREEN_HEIGHT)
 
-        # check if the head hits the body then reset
-        if len(self.positions) > 2 and new_pos in self.positions[2:]:
-            self.reset()
+        # Check if the head hits the body then it is game over
+        if len(self.segments) > 2 and new_pos in self.segments[2:]:
+            self.game_over = True
+            self.game_active = False
         else:
-            self.positions.insert(0, new_pos)
-            if len(self.positions) > self.length:
-                self.positions.pop()
+            # Simulate snake movement by removing the tail and adding a head
+            self.segments.insert(0, new_pos)
+            if len(self.segments) > self.length:
+                self.segments.pop()
 
     def reset(self):
         self.length = 1
-        self.positions = [((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))]
+        self.segments = [((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))]
         self.direction = random.choice([UP, DOWN, LEFT, RIGHT])
         self.score = 0
+        self.game_over = False
 
     def draw(self, surface):
-        for p in self.positions:
+        for p in self.segments:
             r = pygame.Rect((p[0], p[1]), (GRIDSIZE, GRIDSIZE))
             pygame.draw.rect(surface, self.color, r,)
             pygame.draw.rect(surface, LIGHTGRID, r, 1)
@@ -58,6 +72,9 @@ class Snake:
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
+                self.game_active = True
+                if self.game_over:
+                    self.reset()
                 if event.key == pygame.K_UP:
                     self.turn(UP)
                 elif event.key == pygame.K_DOWN:
@@ -93,6 +110,21 @@ def draw_grid(surface):
 
             r = pygame.Rect((x * GRIDSIZE, y * GRIDSIZE), (GRIDSIZE, GRIDSIZE))
             pygame.draw.rect(surface, rgb, r)
+            
+
+def show_press_any_key(screen, font):
+    surface = font.render('Press any key to play', 1, WHITE)
+    surface_rect = surface.get_rect()
+    surface_rect.midbottom = screen.get_rect().midbottom
+    screen.blit(surface, surface_rect)
+
+
+def show_game_over(screen, font):
+    surface = font.render('GAME OVER', 1, WHITE)
+    surface_rect = surface.get_rect()
+    surface_rect.center = screen.get_rect().center
+    #surface_rect.y = SCREEN_HEIGHT // 4
+    screen.blit(surface, surface_rect)
 
 
 SCREEN_WIDTH = 520
@@ -100,6 +132,7 @@ SCREEN_HEIGHT = 520
 
 DARKGRID = (158, 47, 245)
 LIGHTGRID = (144, 47, 216)
+WHITE = (255, 255, 255)
 
 GRIDSIZE = 20
 GRID_WIDTH = SCREEN_HEIGHT // GRIDSIZE
@@ -114,6 +147,10 @@ SPEED = 12
 
 def main():
     pygame.init()
+    score_font = pygame.font.SysFont('Monospace', 20)
+    gameover_font = pygame.font.SysFont('Monospace', 100)
+    pressany_font = pygame.font.SysFont('Monospace', 30)
+
     pygame.display.set_caption('Snake')
 
     clock = pygame.time.Clock()
@@ -126,22 +163,29 @@ def main():
     snake = Snake()
     food = Food()
 
-    myfont = pygame.font.SysFont("Monospace", 20)
-
     while True:
         clock.tick(SPEED)
-        snake.handle_keys()
         draw_grid(surface)
-        snake.move()
-        if snake.get_head_position() == food.position:
-            snake.length += 1
-            snake.score += 1
-            food.randomize_position()
+        snake.handle_keys()
 
         snake.draw(surface)
         food.draw(surface)
+
+        if snake.game_active:
+            snake.move()
+            if snake.get_head_position() == food.position:
+                snake.length += 1
+                snake.score += 1
+                food.randomize_position()
+        else:
+            show_press_any_key(surface, pressany_font)
+
+        if snake.game_over:
+            show_game_over(surface, gameover_font)
+        
         screen.blit(surface, (0, 0))
-        text = myfont.render(f"Score: {snake.score}", 1, (0, 0, 0))
+        
+        text = score_font.render(f"Score: {snake.score}", 1, (0, 0, 0))
         screen.blit(text, (5, 10))
         pygame.display.update()
 
