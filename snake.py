@@ -44,7 +44,7 @@ class Snake:
         new_pos = (new_pos[0] % SCREEN_WIDTH, new_pos[1] % SCREEN_HEIGHT)
 
         # Check if the head hits the body then it is game over
-        if len(self.segments) > 2 and new_pos in self.segments[2:]:
+        if len(self.segments) > 3 and new_pos in self.segments[3:]:
             self.game_over = True
             self.game_active = False
         else:
@@ -127,14 +127,14 @@ def show_game_over(screen, font):
     screen.blit(surface, surface_rect)
 
 
-SCREEN_WIDTH = 520
-SCREEN_HEIGHT = 520
+SCREEN_WIDTH = 600
+SCREEN_HEIGHT = 600
 
 DARKGRID = (158, 47, 245)
 LIGHTGRID = (144, 47, 216)
 WHITE = (255, 255, 255)
 
-GRIDSIZE = 20
+GRIDSIZE = 25
 GRID_WIDTH = SCREEN_HEIGHT // GRIDSIZE
 GRID_HEIGHT = SCREEN_WIDTH // GRIDSIZE
 
@@ -143,11 +143,11 @@ DOWN = (0, 1)
 LEFT = (-1, 0)
 RIGHT = (1, 0)
 
-SPEED = 12
+SPEED = 10
 
 def main():
     pygame.init()
-    score_font = pygame.font.SysFont('Monospace', 20)
+    score_font = pygame.font.SysFont('Monospace', 30)
     gameover_font = pygame.font.SysFont('Monospace', 100)
     pressany_font = pygame.font.SysFont('Monospace', 30)
 
