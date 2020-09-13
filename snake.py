@@ -13,9 +13,12 @@ import random
 
 class Snake:
     def __init__(self):
-        self.length = 1
-        self.segments = [((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))]
-        self.direction = random.choice([UP, DOWN, LEFT, RIGHT])
+        self.length = 3
+        self._x = SCREEN_WIDTH // 2
+        self._y = SCREEN_HEIGHT // 2
+        self.direction = RIGHT
+        self.segments = [(self._x, self._y), (self._x - 1*GRIDSIZE, self._y), (self._x - 2*GRIDSIZE, self._y)]
+
         self.color = (7, 29, 23)
         self.score = 0
         self.game_active = False
@@ -54,9 +57,9 @@ class Snake:
                 self.segments.pop()
 
     def reset(self):
-        self.length = 1
-        self.segments = [((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))]
-        self.direction = random.choice([UP, DOWN, LEFT, RIGHT])
+        self.length = 3
+        self.direction = RIGHT
+        self.segments = [(self._x, self._y), (self._x - 1*GRIDSIZE, self._y), (self._x - 2*GRIDSIZE, self._y)]
         self.score = 0
         self.game_over = False
 
@@ -123,7 +126,6 @@ def show_game_over(screen, font):
     surface = font.render('GAME OVER', 1, WHITE)
     surface_rect = surface.get_rect()
     surface_rect.center = screen.get_rect().center
-    #surface_rect.y = SCREEN_HEIGHT // 4
     screen.blit(surface, surface_rect)
 
 
